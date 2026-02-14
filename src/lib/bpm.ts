@@ -108,7 +108,6 @@ export function buildTable(bpmMin: number, pitchMax: number): TableData {
 
   const rows = bpms.map((src, i) => {
     const cells = bpms.map((dest, j) => {
-      const p1 = roundPercentScaled(src, dest, 1);
       const p2 = roundPercentScaled(src, dest, 2);
       const isSame = src === dest;
       const isBlackCross = src % 10 === 0 && dest % 10 === 0;
