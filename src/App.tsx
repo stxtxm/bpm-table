@@ -37,7 +37,9 @@ const commitOnEnter = (
   commit: (value: string) => void
 ) => {
   if (event.key === 'Enter') {
+    event.preventDefault();
     commit(event.currentTarget.value);
+    event.currentTarget.blur();
   }
 };
 
@@ -50,6 +52,7 @@ type NumberFieldProps = {
   inputMode: 'numeric' | 'decimal';
   onValueChange: (value: string) => void;
   onCommit: (value: string) => void;
+  className?: string;
 };
 
 function NumberField({
@@ -61,9 +64,10 @@ function NumberField({
   inputMode,
   onValueChange,
   onCommit,
+  className,
 }: NumberFieldProps) {
   return (
-    <label>
+    <label className={className}>
       {label}
       <input
         type="number"
@@ -75,6 +79,7 @@ function NumberField({
         onBlur={(event) => onCommit(event.currentTarget.value)}
         onKeyDown={(event) => commitOnEnter(event, onCommit)}
         inputMode={inputMode}
+        enterKeyHint="done"
       />
     </label>
   );
@@ -316,16 +321,6 @@ export default function App() {
             onCommit={commitBpmMin}
             inputMode="numeric"
           />
-          <NumberField
-            label="Crete du pitch (%)"
-            min={0}
-            max={50}
-            step={0.1}
-            value={pitchInput}
-            onValueChange={setPitchInput}
-            onCommit={commitPitch}
-            inputMode="decimal"
-          />
           {!isMobileViewport && (
             <div className="legend">
               {legendItems.map((item) => (
@@ -337,6 +332,22 @@ export default function App() {
             </div>
           )}
         </div>
+        <details className="advanced-pitch">
+          <summary>Options avancees</summary>
+          <div className="advanced-pitch-body">
+            <NumberField
+              className="pitch-field"
+              label="Crete du pitch (%)"
+              min={0}
+              max={50}
+              step={0.1}
+              value={pitchInput}
+              onValueChange={setPitchInput}
+              onCommit={commitPitch}
+              inputMode="decimal"
+            />
+          </div>
+        </details>
 
         {showLookupModule && (
           <div id="lookup-module" className="lookup-card">

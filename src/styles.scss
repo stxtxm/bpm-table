@@ -204,7 +204,7 @@ body {
 
   .controls-row {
     display: grid;
-    grid-template-columns: repeat(2, minmax(130px, 170px)) minmax(0, 1fr);
+    grid-template-columns: minmax(130px, 170px) minmax(0, 1fr);
     gap: 12px;
     align-items: end;
   }
@@ -299,6 +299,50 @@ body {
   .lookup-label {
     font-size: 0.88rem;
     color: var(--muted);
+  }
+
+  .advanced-pitch {
+    border: 1px dashed var(--border);
+    border-radius: 12px;
+    background: #f8fbff;
+    padding: 8px 10px;
+    margin-top: -2px;
+
+    summary {
+      cursor: pointer;
+      color: var(--muted);
+      font-size: 0.82rem;
+      font-weight: 600;
+      list-style: none;
+      user-select: none;
+    }
+
+    summary::-webkit-details-marker {
+      display: none;
+    }
+
+    summary::after {
+      content: '+';
+      float: right;
+    }
+
+    &[open] summary::after {
+      content: '-';
+    }
+
+    .advanced-pitch-body {
+      margin-top: 10px;
+      max-width: 210px;
+    }
+
+    .pitch-field {
+      opacity: 0.86;
+      font-size: 0.88rem;
+    }
+
+    .pitch-field input {
+      background: #fbfdff;
+    }
   }
 }
 
@@ -627,6 +671,15 @@ body {
     .legend {
       display: none;
     }
+
+    .advanced-pitch {
+      margin-top: 0;
+      padding: 8px;
+
+      .advanced-pitch-body {
+        max-width: none;
+      }
+    }
   }
 
   .lookup-card {
@@ -689,11 +742,16 @@ body {
   }
 
   .bpmtable {
+    width: max-content;
+    min-width: 100%;
+    table-layout: auto;
+
     th,
     td {
-      min-width: 56px;
-      padding: 6px;
-      font-size: 0.78rem;
+      min-width: 60px;
+      padding: 6px 7px;
+      font-size: 0.8rem;
+      white-space: nowrap;
     }
   }
 }
