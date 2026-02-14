@@ -1,37 +1,37 @@
 # BPM TABLE
 
-Application web React/TypeScript pour convertir des BPM et lire les pourcentages de variation avec **les mêmes valeurs à 2 décimales** que la table de référence.
+BPM TABLE is a React + TypeScript web app for BPM conversion and percentage change lookup, matching the original reference table values with fixed 2-decimal precision.
 
-## Aperçu
+## Features
 
-- Interface SPA responsive (desktop + mobile)
-- Table complète BPM avec sélection source/destination
-- Liste mobile optimisée
-- Calcul exact (arrondi contrôlé, pas d'approximation flottante)
-- PWA (manifest + service worker)
-- Déploiement prêt pour Vercel
+- Responsive SPA layout (desktop + mobile)
+- Full BPM matrix with source/destination selection
+- Mobile-optimized destination list workflow
+- Exact percentage math with deterministic rounding
+- PWA-ready setup (manifest + service worker)
+- Vercel-ready deployment configuration
 
-Exemples attendus :
+Reference outputs:
 
 - `125 -> 126 = +0.80%`
 - `122 -> 123 = +0.82%`
 - `100 -> 101 = +1.00%`
 
-## Stack
+## Tech Stack
 
-- React 18 + TypeScript
+- React 18
+- TypeScript
 - Vite 5
 - SCSS
-- PWA basique (`public/manifest.webmanifest`, `public/sw.js`)
 
-## Démarrage local
+## Getting Started
 
 ```bash
 npm install
 npm run dev
 ```
 
-Build production :
+Production build:
 
 ```bash
 npm run build
@@ -40,61 +40,53 @@ npm run preview
 
 ## Scripts
 
-- `npm run dev` : lance Vite en développement
-- `npm run build` : `tsc -b && vite build`
-- `npm run preview` : prévisualisation du build
+- `npm run dev` starts the Vite dev server
+- `npm run build` runs `tsc -b && vite build`
+- `npm run preview` serves the production build locally
 
-## Logique de calcul
+## Calculation Model
 
-Le calcul est fait dans `src/lib/bpm.ts` avec `BigInt` pour éviter les erreurs de flottants JavaScript.
+The core logic is implemented in `src/lib/bpm.ts` using `BigInt` to avoid floating-point drift.
 
-Formule utilisée :
+Formula:
 
-`((dest - src) / src) * 100`
+`((destination - source) / source) * 100`
 
-Le formatage est ensuite forcé sur 2 décimales avec gestion du signe (`+` / `-`).
+Values are then formatted to exactly 2 decimals with explicit sign handling (`+` / `-`).
 
-## Architecture rapide
+## Project Structure
 
-- `src/App.tsx` : composition UI + états + interactions
-- `src/components/BpmTable.tsx` : table complète desktop/mobile fullscreen
-- `src/components/BpmList.tsx` : liste des BPM destination (mobile)
-- `src/lib/bpm.ts` : génération table + logique mathématique
-- `src/styles.scss` : thème et layout responsive
-- `src/types/pwa.d.ts` : types `beforeinstallprompt`
-- `src/vite-env.d.ts` : types Vite (`import.meta.env`)
+- `src/App.tsx` application state and UI composition
+- `src/components/BpmTable.tsx` full matrix table
+- `src/components/BpmList.tsx` mobile destination list
+- `src/lib/bpm.ts` table generation and math engine
+- `src/styles.scss` responsive theme and layout
+- `src/types/pwa.d.ts` install prompt typings
+- `src/vite-env.d.ts` Vite env typings
 
-## Déploiement Vercel
+## Vercel Deployment
 
-Le repo contient déjà `vercel.json` :
+The repository includes `vercel.json` with:
 
 - `framework`: `vite`
 - `buildCommand`: `npm run build`
 - `outputDirectory`: `dist`
 
-### Déploiement
+Deployment flow:
 
-1. Push du repo sur GitHub
-2. Import du repo dans Vercel
+1. Push to GitHub
+2. Import the repository in Vercel
 3. Deploy
-
-### Si erreur TypeScript sur Vercel
-
-Le projet est déjà configuré pour éviter les erreurs classiques (`Map`, `Set`, `import.meta.env`) via :
-
-- `tsconfig.node.json` (lib/types node)
-- `src/vite-env.d.ts`
-- `@types/node` en devDependencies
 
 ## PWA
 
-L'app propose l'installation quand l'événement `beforeinstallprompt` est disponible.
+Install prompt support is enabled through `beforeinstallprompt`.
 
-Fichiers clés :
+Key files:
 
 - `public/manifest.webmanifest`
 - `public/sw.js`
 
-## Licence
+## License
 
-Usage projet interne/privé (à adapter si besoin d'une licence publique).
+Private/internal use by default. Add a public license file if needed.
