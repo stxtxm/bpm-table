@@ -202,6 +202,14 @@ body {
     }
   }
 
+  .controls-actions {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
   .controls-row {
     display: grid;
     grid-template-columns: minmax(130px, 170px) minmax(0, 1fr);
@@ -214,6 +222,17 @@ body {
     gap: 8px;
     font-size: 0.94rem;
     color: var(--muted);
+  }
+
+  .field-input-shell {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .field-input-addon {
+    display: inline-flex;
   }
 
   input {
@@ -231,6 +250,43 @@ body {
       border-color: var(--accent);
       box-shadow: 0 0 0 3px var(--accent-soft);
     }
+  }
+
+  .direction-icon-button {
+    width: 42px;
+    height: 42px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: #ffffff;
+    color: var(--muted);
+    padding: 0;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: border-color 0.16s ease, color 0.16s ease,
+      background-color 0.16s ease;
+
+    &:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    &[aria-pressed='true'] {
+      color: var(--accent);
+      border-color: var(--accent);
+      background: var(--accent-soft);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+  }
+
+  .direction-icon {
+    font-size: 1.12rem;
+    line-height: 1;
   }
 
   .legend {
@@ -344,6 +400,7 @@ body {
       background: #fbfdff;
     }
   }
+
 }
 
 .ghost-button {

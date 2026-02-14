@@ -93,8 +93,13 @@ export function calcPercent(src: number, dest: number): CalcResult | null {
   return { valueText, valueTextSigned, labelText };
 }
 
-export function buildTable(bpmMin: number, pitchMax: number): TableData {
-  const bpms = Array.from({ length: RANGE + 1 }, (_, i) => bpmMin + i);
+export function buildTable(
+  bpmStart: number,
+  pitchMax: number,
+  isDescending = false
+): TableData {
+  const step = isDescending ? -1 : 1;
+  const bpms = Array.from({ length: RANGE + 1 }, (_, i) => bpmStart + i * step);
   const pitchScaled = BigInt(Math.round(pitchMax * 10));
 
   const inRange = bpms.map((src) =>
@@ -147,7 +152,7 @@ export function buildTable(bpmMin: number, pitchMax: number): TableData {
         ? ''
         : `${src} -> ${dest} = ${formatScaledWithSign(p2, 2)}%`;
 
-      if (!defaultSelection && src === bpmMin && dest === bpmMin + 1) {
+      if (!defaultSelection && src === bpmStart && dest === bpmStart + step) {
         defaultSelection = { src, dest, labelText };
       }
 

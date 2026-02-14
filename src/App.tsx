@@ -1,4 +1,10 @@
-import { useMemo, useState, useEffect, type KeyboardEvent } from 'react';
+import {
+  useMemo,
+  useState,
+  useEffect,
+  type KeyboardEvent,
+  type ReactNode,
+} from 'react';
 import BpmTable from './components/BpmTable';
 import BpmList from './components/BpmList';
 import {
@@ -15,6 +21,20 @@ const clamp = (value: number, min: number, max: number) =>
 const BPM_MIN = 40;
 const BPM_MAX = 300;
 const MOBILE_BREAKPOINT = 900;
+
+const getAdjacentDest = (base: number, isDescending: boolean): number => {
+  const preferred = base + (isDescending ? -1 : 1);
+  if (preferred >= BPM_MIN && preferred <= BPM_MAX) {
+    return preferred;
+  }
+
+  const fallback = base + (isDescending ? 1 : -1);
+  if (fallback >= BPM_MIN && fallback <= BPM_MAX) {
+    return fallback;
+  }
+
+  return base;
+};
 
 const parseIntegerInput = (value: string): number | null => {
   if (!value.trim()) {
@@ -53,6 +73,7 @@ type NumberFieldProps = {
   onValueChange: (value: string) => void;
   onCommit: (value: string) => void;
   className?: string;
+  afterInput?: ReactNode;
 };
 
 function NumberField({
@@ -65,22 +86,26 @@ function NumberField({
   onValueChange,
   onCommit,
   className,
+  afterInput,
 }: NumberFieldProps) {
   return (
     <label className={className}>
       {label}
-      <input
-        type="number"
-        min={min}
-        max={max}
-        step={step}
-        value={value}
-        onChange={(event) => onValueChange(event.currentTarget.value)}
-        onBlur={(event) => onCommit(event.currentTarget.value)}
-        onKeyDown={(event) => commitOnEnter(event, onCommit)}
-        inputMode={inputMode}
-        enterKeyHint="done"
-      />
+      <span className="field-input-shell">
+        <input
+          type="number"
+          min={min}
+          max={max}
+          step={step}
+          value={value}
+          onChange={(event) => onValueChange(event.currentTarget.value)}
+          onBlur={(event) => onCommit(event.currentTarget.value)}
+          onKeyDown={(event) => commitOnEnter(event, onCommit)}
+          inputMode={inputMode}
+          enterKeyHint="done"
+        />
+        {afterInput ? <span className="field-input-addon">{afterInput}</span> : null}
+      </span>
     </label>
   );
 }
@@ -90,19 +115,12 @@ const getCell = (
   src: number,
   dest: number
 ): TableCell | null => {
-  const min = data.bpms[0];
-  const max = data.bpms[data.bpms.length - 1];
-
-  if (src < min || src > max || dest < min || dest > max) {
-    return null;
-  }
-
-  const row = data.rows[src - min];
+  const row = data.rows.find((item) => item.src === src);
   if (!row) {
     return null;
   }
 
-  const cell = row.cells[dest - min];
+  const cell = row.cells.find((item) => item.dest === dest);
   if (!cell || !cell.selectable) {
     return null;
   }
@@ -113,6 +131,7 @@ const getCell = (
 export default function App() {
   const [bpmMin, setBpmMin] = useState(120);
   const [pitchMax, setPitchMax] = useState(6);
+  const [isDescending, setIsDescending] = useState(false);
   const [sourceBpm, setSourceBpm] = useState(120);
   const [destBpm, setDestBpm] = useState(121);
   const [showTable, setShowTable] = useState(false);
@@ -125,7 +144,10 @@ export default function App() {
   const [sourceInput, setSourceInput] = useState('120');
   const [destInput, setDestInput] = useState('121');
 
-  const data = useMemo(() => buildTable(bpmMin, pitchMax), [bpmMin, pitchMax]);
+  const data = useMemo(
+    () => buildTable(bpmMin, pitchMax, isDescending),
+    [bpmMin, pitchMax, isDescending]
+  );
   const rangeMin = data.bpms[0];
   const rangeMax = data.bpms[data.bpms.length - 1];
 
@@ -187,6 +209,12 @@ export default function App() {
 
   const selectionLabel = calc ? calc.labelText : '--';
   const lookupValue = calc ? `${calc.valueTextSigned}%` : '--';
+  const directionAriaLabel = isDescending
+    ? 'Mode descendant actif, basculer en mode ascendant'
+    : 'Mode ascendant actif, basculer en mode descendant';
+  const directionTitle = isDescending
+    ? 'Mode descendant'
+    : 'Mode ascendant';
 
   const commitBpmMin = (value: string) => {
     const parsed = parseIntegerInput(value);
@@ -195,10 +223,10 @@ export default function App() {
       return;
     }
     const next = clamp(parsed, BPM_MIN, BPM_MAX);
-    const nextDest = next < BPM_MAX ? next + 1 : next - 1;
+    const nextDest = getAdjacentDest(next, isDescending);
     setBpmMin(next);
     setSourceBpm(next);
-    setDestBpm(clamp(nextDest, BPM_MIN, BPM_MAX));
+    setDestBpm(nextDest);
     setBpmMinInput(next.toString());
   };
 
@@ -246,6 +274,18 @@ export default function App() {
     }
   };
 
+  const handleToggleDirection = () => {
+    const nextDescending = !isDescending;
+    const nextSource = bpmMin;
+    const nextDest = getAdjacentDest(nextSource, nextDescending);
+
+    setIsDescending(nextDescending);
+    setSourceBpm(nextSource);
+    setDestBpm(nextDest);
+    setSourceInput(nextSource.toString());
+    setDestInput(nextDest.toString());
+  };
+
   const handleTableSelect = (next: Selection) => {
     setSourceBpm(next.src);
     setDestBpm(next.dest);
@@ -262,6 +302,7 @@ export default function App() {
   const metrics = [
     { label: 'Grille', value: `${data.bpms.length} x ${data.bpms.length}` },
     { label: 'Plage', value: `${rangeMin} - ${rangeMax} BPM` },
+    { label: 'Sens', value: isDescending ? 'Descendant' : 'Ascendant' },
     { label: 'Coupure pitch', value: `${pitchMax.toFixed(1)}%` },
   ] as const;
 
@@ -297,22 +338,24 @@ export default function App() {
       <section className="panel controls">
         <div className="controls-header">
           <h2>Module BPM</h2>
-          <button
-            type="button"
-            className="ghost-button ghost-button-compact"
-            aria-controls="lookup-module"
-            aria-expanded={showLookupModule}
-            onClick={() => setShowLookupModule((prev) => !prev)}
-          >
-            {showLookupModule
-              ? 'Masquer source -> destination'
-              : 'Afficher source -> destination'}
-          </button>
+          <div className="controls-actions">
+            <button
+              type="button"
+              className="ghost-button ghost-button-compact"
+              aria-controls="lookup-module"
+              aria-expanded={showLookupModule}
+              onClick={() => setShowLookupModule((prev) => !prev)}
+            >
+              {showLookupModule
+                ? 'Masquer source -> destination'
+                : 'Afficher source -> destination'}
+            </button>
+          </div>
         </div>
 
         <div className="controls-row">
           <NumberField
-            label="BPM minimal"
+            label="BPM de depart"
             min={BPM_MIN}
             max={BPM_MAX}
             step={1}
@@ -320,6 +363,20 @@ export default function App() {
             onValueChange={setBpmMinInput}
             onCommit={commitBpmMin}
             inputMode="numeric"
+            afterInput={
+              <button
+                type="button"
+                className="direction-icon-button"
+                aria-label={directionAriaLabel}
+                aria-pressed={isDescending}
+                title={directionTitle}
+                onClick={handleToggleDirection}
+              >
+                <span className="direction-icon" aria-hidden="true">
+                  {isDescending ? '↘' : '↗'}
+                </span>
+              </button>
+            }
           />
           {!isMobileViewport && (
             <div className="legend">
