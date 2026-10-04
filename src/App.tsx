@@ -319,7 +319,7 @@ export default function App() {
           <div className="brand">
             <img
               className="brand-logo"
-              src="/logo-mark.svg"
+              src={`${import.meta.env.BASE_URL}logo-mark.svg`}
               alt="BPM TABLE logo"
             />
             <h1 className="brand-title">BPM TABLE</h1>
