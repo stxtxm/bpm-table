@@ -9,7 +9,7 @@ BPM TABLE is a React + TypeScript web app for BPM conversion and percentage chan
 - Mobile-optimized destination list workflow
 - Exact percentage math with deterministic rounding
 - PWA-ready setup (manifest + service worker)
-- Vercel-ready deployment configuration
+- GitHub Pages deployment via GitHub Actions
 
 Reference outputs:
 
@@ -38,6 +38,9 @@ npm run build
 npm run preview
 ```
 
+Because `vite.config.ts` sets `base: '/bpm-table/'`, the preview server serves the app at
+<http://localhost:4173/bpm-table/>.
+
 ## Scripts
 
 - `npm run dev` starts the Vite dev server
@@ -64,19 +67,34 @@ Values are then formatted to exactly 2 decimals with explicit sign handling (`+`
 - `src/types/pwa.d.ts` install prompt typings
 - `src/vite-env.d.ts` Vite env typings
 
-## Vercel Deployment
+## GitHub Pages Deployment
 
-The repository includes `vercel.json` with:
+Deployed at <https://stxtxm.github.io/bpm-table/>.
 
-- `framework`: `vite`
-- `buildCommand`: `npm run build`
-- `outputDirectory`: `dist`
+`.github/workflows/deploy.yml` builds on every push to `master` and publishes `dist/`:
 
-Deployment flow:
+1. `actions/configure-pages` resolves the Pages base path and exposes it as `base_path`
+2. `npm run build` runs with `BASE_PATH=<base_path>/`
+3. `actions/upload-pages-artifact` uploads `dist`
+4. `actions/deploy-pages` publishes it
 
-1. Push to GitHub
-2. Import the repository in Vercel
-3. Deploy
+Setup steps (already done):
+
+- Repo Settings → Pages → Source: **GitHub Actions**
+- `vite.config.ts` default base: `/bpm-table/`
+
+### Subpath handling
+
+Everything is served from a repository subpath, so paths are base-aware:
+
+- `vite.config.ts` reads `process.env.BASE_PATH` (defaults to `/bpm-table/`)
+- `src/main.tsx` registers the service worker via `import.meta.env.BASE_URL`
+- `public/sw.js` derives its base from `new URL('./', self.location.href)`
+- `public/manifest.webmanifest` uses relative `start_url`, `scope` and icon `src`
+- `public/.nojekyll` disables Jekyll processing on Pages
+
+If a custom domain is added at the apex (base path `""`), the workflow passes `BASE_PATH=/`
+and everything keeps working without code changes.
 
 ## PWA
 

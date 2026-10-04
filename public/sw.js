@@ -1,16 +1,20 @@
-const CACHE_NAME = 'bpm-table-v3';
-const APP_SHELL = [
-  '/',
-  '/index.html',
-  '/manifest.webmanifest',
-  '/favicon.ico',
-  '/logo-mark.svg',
-  '/logo-wordmark.svg',
-  '/icon-192.png',
-  '/icon-192-maskable.png',
-  '/icon-512.png',
-  '/icon-512-maskable.png'
+const CACHE_NAME = 'bpm-table-v4';
+const BASE = new URL('./', self.location.href).pathname;
+const INDEX_URL = `${BASE}index.html`;
+
+const appUrls = [
+  'index.html',
+  'manifest.webmanifest',
+  'favicon.ico',
+  'logo-mark.svg',
+  'logo-wordmark.svg',
+  'icon-192.png',
+  'icon-192-maskable.png',
+  'icon-512.png',
+  'icon-512-maskable.png'
 ];
+
+const APP_SHELL = appUrls.map((path) => `${BASE}${path}`);
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -44,15 +48,19 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  if (!url.pathname.startsWith(BASE)) {
+    return;
+  }
+
   if (event.request.mode === 'navigate') {
     event.respondWith(
       fetch(event.request)
         .then((response) => {
           const copy = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put('/index.html', copy));
+          caches.open(CACHE_NAME).then((cache) => cache.put(INDEX_URL, copy));
           return response;
         })
-        .catch(() => caches.match('/index.html'))
+        .catch(() => caches.match(INDEX_URL))
     );
     return;
   }

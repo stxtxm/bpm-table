@@ -27,13 +27,16 @@
 - `src/styles.scss`
 - `tsconfig.node.json`
 - `vite.config.ts`
-- `vercel.json`
+- `.github/workflows/deploy.yml`
 
 ## Déploiement
 
-- Vercel lit `vercel.json`
-- Build command : `npm run build`
-- Output : `dist`
+- GitHub Pages (plus de Vercel, quotas épuisés)
+- URL : https://stxtxm.github.io/bpm-table/
+- Push sur `master` → workflow `deploy.yml` → artefact `dist` → `deploy-pages`
+- `BASE_PATH` injecté par `actions/configure-pages` (défaut local : `/bpm-table/`)
+- `public/.nojekyll` empêche Jekyll de trier le contenu
+- Chemins subpath-safe : service worker via `BASE_URL`, `sw.js` et `manifest.webmanifest` en URLs relatives
 
 ## À surveiller / prochaines améliorations
 
