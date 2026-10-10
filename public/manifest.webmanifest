@@ -2,6 +2,7 @@
   "name": "BPM TABLE",
   "short_name": "BPM TABLE",
   "description": "Table BPM pourcentage mobile.",
+  "id": "./?source=pwa",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
