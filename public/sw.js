@@ -1,6 +1,7 @@
-const CACHE_NAME = 'bpm-table-v4';
+const CACHE_NAME = 'bpm-table-v5';
 const BASE = new URL('./', self.location.href).pathname;
 const INDEX_URL = `${BASE}index.html`;
+const MANIFEST_URL = `${BASE}manifest.webmanifest`;
 
 const appUrls = [
   'index.html',
@@ -61,6 +62,25 @@ self.addEventListener('fetch', (event) => {
           return response;
         })
         .catch(() => caches.match(INDEX_URL))
+    );
+    return;
+  }
+
+  // Manifest is always served network-first so identity/install changes propagate
+  // immediately instead of being stuck behind a stale cached manifest.
+  if (url.pathname === MANIFEST_URL) {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          const copy = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
+          return response;
+        })
+        .catch(() =>
+          caches
+            .match(event.request)
+            .then((cached) => cached ?? caches.match(MANIFEST_URL))
+        )
     );
     return;
   }
